@@ -1,0 +1,26 @@
+logger:
+    file: /open5gs/install/var/log/open5gs/upf2.log
+
+parameter:
+
+upf:
+    pfcp:
+      - addr: UPF2_IP
+    gtpu:
+      - addr: UPF2_IP
+        advertise: UPF2_ADVERTISE_IP
+    subnet:
+      - addr: 192.168.104.1/24
+        dev: ogstun
+        dnn: private
+      - addr: 2001:230:fafe::1/48
+        dev: ogstun
+        dnn: private
+    metrics:
+      - addr: UPF2_IP
+        port: 9091
+
+smf:
+    pfcp:
+      - addr: SMF2_IP
+        dnn: private
