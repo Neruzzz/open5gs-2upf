@@ -23,7 +23,7 @@ nssf:
         port: 7777
         s_nssai:
           sst: 1
-          sd: 00000
+          sd: 000002
 
 scp:
     sbi:
