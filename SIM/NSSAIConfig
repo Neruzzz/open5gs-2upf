@@ -1,0 +1,42 @@
+set echo true
+verify_adm XXXXXXXX
+select ADF.USIM
+select EF.UST
+ust_service_activate 122
+ust_service_deactivate 123
+ust_service_deactivate 124
+ust_service_deactivate 125
+ust_service_deactivate 126
+ust_service_deactivate 127
+ust_service_deactivate 129
+ust_service_deactivate 130
+ust_service_activate 132
+ust_service_deactivate 133
+ust_service_deactivate 134
+ust_service_deactivate 135
+select ADF.USIM
+select DF.5GS
+select EF.5GAUTHKEYS
+deactivate_file
+select EF.OPL5G
+deactivate_file
+select EF.Routing_Indicator
+deactivate_file
+select EF.SUCI_Calc_Info
+deactivate_file
+select EF.SUPI_NAI
+deactivate_file
+select EF.TN3GPPSNN
+deactivate_file
+select EF.UAC_AIC
+deactivate_file
+activate_file EF.5GS3GPPLOCI
+activate_file EF.5GSN3GPPNSC
+activate_file EF.5GSN3GPPLOCI
+activate_file EF.5GS3GPPNSC
+activate_file EF.URSP
+select EF.URSP
+update_binary fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+update_binary EF5F1101EF1E80
+quit
+
