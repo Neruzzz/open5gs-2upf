@@ -221,8 +221,94 @@ This approach provides flexibility to deploy only the components you need on eac
 
 
 
-## Suscribe UE and check logs
+## 📲 Subscribe UE and Check Logs
 
+Once the deployment is up, you need to **subscribe the UEs** to the network so they can register and access services.  
+This is done using the web application provided by the **WebUI** service.
+
+Follow these steps to access and use the WebUI:
+
+
+### 1. Forward port 3000
+
+If you're connected to the **cloud machine via remote connection in VSCode**, forward port `3000` as shown below:  
+![Port forwarding in VSCode](docs/img/portvsc.png "Port forwarding in VSCode")
+
+If you're connected via SSH, run the following command on your local machine:
+
+```bash
+ssh -L 3000:localhost:3000 user@remote-ip
+```
+
+> Replace `user` and `remote-ip` with your SSH username and IP.
+
+If you are already on the machine running the deployment, proceed to the next step.
+
+
+### 2. Access the WebUI in your browser
+
+Open your browser (e.g., Chrome, Firefox) and go to:
+
+```
+http://localhost:3000
+```
+
+
+### 3. Log in to the WebUI
+
+Use the default credentials:
+
+- **Username**: `admin`  
+- **Password**: `1423`
+
+![Login page](docs/img/login.png "WebUI Login page")
+
+
+
+### 4. Open the subscriber creation page
+
+Once inside the WebUI, go to the **Subscriber** section and click the **Add** button:
+
+![Add subscriber button](docs/img/subutton.png "Add subscriber in WebUI")
+
+
+
+### 5. Enter SIM card information
+
+Fill in the following fields using the data from your SIM card provider:
+
+- **IMSI**
+- **Key (K or Ki)**
+- **OPC (or OP)**
+
+You only need to fill those three fields.  
+This information can also be found in the `SIM/sim_cards.csv` file provided in this project.
+
+![SIM card information](docs/img/siminfo.png "Enter SIM card details")
+
+
+
+### 6. Configure the slice and APNs
+
+By default, we use **one slice**. To configure it:
+
+- Scroll down and fill in the **Slice SST** and **SD** with the values used in your cloud SMF configuration.
+
+![Slice configuration section](docs/img/image.png)
+
+Then, add a second **APN** by clicking the second `+` icon from the left:
+
+![Add another APN](docs/img/image-1.png)
+
+Fill it just like the first one, but use the APN name configured for the **edge UPF**, typically something like:
+
+```text
+edge
+```
+
+![Edge APN configuration](docs/img/image-2.png)
+
+> 🧠 For more details on configuring multiple slices, refer to the section: [Two Slices Deployment](#two-slices-deployment)
 
 
 ## Two slices deployment
