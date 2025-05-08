@@ -15,7 +15,7 @@ smf:
     info:
       - s_nssai:
           - sst: 1
-            sd: 000001
+            sd: 000001 #000002 if there is 2 slices
             dnn:
               - edge
     sbi:
