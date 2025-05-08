@@ -12,10 +12,10 @@ upf:
     subnet:
       - addr: 192.168.104.1/24
         dev: ogstun
-        dnn: private
+        dnn: edge
       - addr: 2001:230:fafe::1/48
         dev: ogstun
-        dnn: private
+        dnn: edge
     metrics:
       - addr: UPF2_IP
         port: 9091
@@ -23,4 +23,4 @@ upf:
 smf:
     pfcp:
       - addr: SMF2_IP
-        dnn: private
+        dnn: edge

@@ -164,6 +164,38 @@ services:
     networks:
       default:
         ipv4_address: ${SMF_IP}
+
+
+  smf2:
+    image: docker_open5gs
+    container_name: smf2
+    env_file:
+      - .env
+    environment:
+      - COMPONENT_NAME=smf2-1
+      - DEPLOY_MODE=5G
+    volumes:
+      - ./smf:/mnt/smf
+      - ./log:/open5gs/install/var/log/open5gs
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "${DOCKER_HOST_IP}:7777:7777/tcp"
+    expose:
+      - "3868/udp"
+      - "3868/tcp"
+      - "3868/sctp"
+      - "5868/udp"
+      - "5868/tcp"
+      - "5868/sctp"
+      - "8805/udp"
+      - "2123/udp"
+      - "7777/tcp"
+      - "9091/tcp"
+    networks:
+      default:
+        ipv4_address: ${SMF2_IP}
+
   upf:
     image: docker_open5gs
     depends_on:
@@ -195,33 +227,8 @@ services:
     networks:
       default:
         ipv4_address: ${UPF_IP}
-  smf2:
-    image: docker_open5gs
-    container_name: smf2
-    env_file:
-      - .env
-    environment:
-      - COMPONENT_NAME=smf2-1
-      - DEPLOY_MODE=5G
-    volumes:
-      - ./smf:/mnt/smf
-      - ./log:/open5gs/install/var/log/open5gs
-      # - /etc/timezone:/etc/timezone:ro
-      # - /etc/localtime:/etc/localtime:ro
-    expose:
-      - "3868/udp"
-      - "3868/tcp"
-      - "3868/sctp"
-      - "5868/udp"
-      - "5868/tcp"
-      - "5868/sctp"
-      - "8805/udp"
-      - "2123/udp"
-      - "7777/tcp"
-      - "9091/tcp"
-    networks:
-      default:
-        ipv4_address: ${SMF2_IP}
+
+
   upf2:
     image: docker_open5gs
     depends_on:
@@ -234,8 +241,8 @@ services:
     volumes:
       - ./upf:/mnt/upf
       - ./log:/open5gs/install/var/log/open5gs
-      # - /etc/timezone:/etc/timezone:ro
-      # - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     expose:
       - "2152/udp"
       - "8805/udp"
@@ -251,6 +258,7 @@ services:
     networks:
       default:
         ipv4_address: ${UPF2_IP}
+
   amf:
     image: docker_open5gs
     depends_on:
@@ -392,6 +400,20 @@ services:
     networks:
       default:
         ipv4_address: ${GRAFANA_IP}
+
+  mqtt:
+    image: eclipse-mosquitto:latest
+    container_name: mqttserver
+    env_file:
+      - .env
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+    networks:
+      default:
+        ipv4_address: ${MQTT_IP}
 
 
 networks:

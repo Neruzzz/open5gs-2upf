@@ -15,12 +15,13 @@ smf:
     info:
       - s_nssai:
           - sst: 1
-            sd: 000002
+            sd: 000001
             dnn:
-              - private
+              - edge
     sbi:
       - addr: SMF2_IP
         port: 7777
+        advertise: DOCKER_HOST_IP
     gtpc:
       - addr: SMF2_IP
     gtpu:
@@ -28,15 +29,15 @@ smf:
     pfcp:
       - addr: SMF2_IP
     subnet:
-      - addr: 192.168.104.1/24
-        dnn: private
+      - addr: UE_IPV4_INTERNET_TUN_IP
+        dnn: edge
         dev: ogstun
       - addr: 2001:230:fafe::1/48
         dev: ogstun
-        dnn: private
+        dnn: edge
     dns:
-      - 8.8.8.8
-      - 8.8.4.4
+      - 192.168.50.1
+      - 192.168.50.1
       - 2001:4860:4860::8888
       - 2001:4860:4860::8844
     p-cscf:
@@ -61,4 +62,4 @@ nrf:
 upf:
     pfcp:
       - addr: UPF2_IP
-        dnn: private
+        dnn: edge
