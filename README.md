@@ -1,4 +1,4 @@
-# Open5GS 2UPF Cloud-Edge Deployment
+# Open5GS 2-UPF cloud-edge deployment
 
 This repository provides a complete deployment setup for a 5G standalone core using Open5GS (version **2.6.6**) and Amarisoft gNB. It supports a dual deployment architecture with two pairs of SMF/UPF components: one in the **cloud** and one at the **edge**. The UE dynamically selects the user plane route based on the **APN** configuration: one APN points to the cloud UPF, and another points to the edge UPF, enabling differentiated traffic handling and slicing.
 
@@ -7,9 +7,9 @@ This repository provides a complete deployment setup for a 5G standalone core us
 This project builds upon the original work by Herle Supreeth:  
 🔗 [https://github.com/herlesupreeth/docker_open5gs](https://github.com/herlesupreeth/docker_open5gs)
 
----
 
-## 📁 Repository Structure
+
+## 📁 Repository structure
 
 Each folder corresponds to a network function or support module:
 
@@ -36,62 +36,97 @@ Additional components:
 - `.env`: Docker environment configuration.
 - `deployment.yaml`: Main Docker Compose file used to launch the architecture.
 
----
 
-## ⚙️ Initial Steps for Cloud and Edge Nodes
 
-This project can run either in the **cloud only** or in a **cloud + edge** architecture.  
-The following steps are **common to both setups** and must be applied to each node (cloud and/or edge).
+## ⚙️ Initial setup: cloud and edge nodes
+
+This project can be deployed in two ways:
+- ☁️ **Cloud-only** deployment (all Open5GS services run in the cloud)
+- ☁️ **Cloud + 🖥️ Edge** deployment (SMF and UPF are replicated at edge and the route to internet selected via APN)
+
+The following steps must be applied to **each node** involved in the deployment (either cloud or edge), with some configuration differences depending on the role.
+
+
 
 ### 1. Clone the repository
 
-Clone this repository and navigate into it:
+On each node (cloud and edge), clone this repository and navigate into it:
 
 ```bash
 git clone <this_repo_url>
 cd open5gs-2upf
 ```
 
-### 2. Set your machine IP in the `.env` file
 
-Edit the `.env` file and add the IP address of the machine that will run the deployment:
+### 2. Configure the `.env` file
+
+Each node requires a local `.env` file. The following variables must be set depending on the role.
+
+#### ☁️ 🖥️ Common to Cloud and Edge
+
+Edit the `.env` file:
 
 ```bash
 nano .env
 ```
 
-Inside the file, make sure you have:
+Set the host IP of the current machine:
 
 ```env
 DOCKER_HOST_IP=192.168.X.X
 ```
 
-Replace `192.168.X.X` with the actual IP of the host.
+Also configure the UPF advertising IPs:
+
+```env
+UPF_ADVERTISE_IP=192.168.X.X      # Cloud node
+UPF2_ADVERTISE_IP=192.168.Y.Y     # Edge node
+```
+
+> On the **cloud node**, only `UPF_ADVERTISE_IP` needs to be changed.  
+> On the **edge node**, only `UPF2_ADVERTISE_IP` must be changed.
+
+To ensure that the system is able to resolve domain names, ensure the DNS IP is changed in both machines:
+
+```env
+SMF_DNS1=192.168.50.1 # If your DNS if different change this
+SMF_DNS2=192.168.50.1
+```
+> Change both in both machines (cloud and edge)
+
+#### 🖥️ Only on the edge node
+
+To ensure that the edge services can discover the cloud-deployed components, update the following IPs to point to the **cloud node**:
+
+```env
+SCP_IP=192.168.CLOUD_IP
+NRF_IP=192.168.CLOUD_IP
+```
+
+No need to modify these on the cloud node.
+
 
 ### 3. Build the Open5GS Docker image
 
-Use the build script provided to create the Open5GS Docker image:
+Build the Docker image for Open5GS (only required once per node):
 
 ```bash
 cd scripts
 ./build.sh
 ```
 
-This compiles Open5GS version **2.6.6** and prepares the Docker image for deployment.
-
-### 4. Edge side `.env` modifications
+This script compiles Open5GS version **2.6.6** and creates the Docker image.
 
 
 
+### 4. Proceed to Amarisoft gNB configuration
 
-### 5. Continue with Amarisoft Configuration
+With the environment configured and Docker images built,  
+you can now configure the **Amarisoft gNB** to connect to the cloud-deployed AMF.
 
-After setting up the environment and building the image,   you can proceed to configure **Amarisoft gNB** to connect to the cloud AMF.
 
 
----
-
-## 📡 Amarisoft gNB Configuration
+## 📡 Amarisoft gNB configuration
 
 > ⚠️ **Note**: If SDRs are not detected after a reboot or crash, you must reinitialize them manually:
 >
@@ -127,15 +162,13 @@ cp gnb-sa-* gnb-sa-open5gs
   gtp_addr: "192.168.x.x"
 ```
 
-Set also the 
-
 4. Create or update the symlink `enb.cfg`:
 
 ```bash
 ln -sf gnb-sa-open5gs enb.cfg
 ```
 
-5. Restart the Amarisoft service:
+5. Restart the Amarisoft LTE service:
 
 ```bash
 sudo systemctl restart lte.service
@@ -146,23 +179,59 @@ To debug Amarisoft and access the interactive menu:
 ```bash
 screen -r
 ```
----
 
-## Deploy the docker composes
 
----
+## 🚀 Deploying the Docker services
+
+To launch the Open5GS services on each node, use the predefined scripts available in the `scripts/` folder.
+
+### 🛠️ Available scripts
+
+- `runCloud.sh` – for deploying services on the **cloud node**
+- `runEdge.sh` – for deploying services on the **edge node**
+
+To execute them do the following on the desired node:
+
+```bash
+cd scripts # In both nodes
+bash runCloud.sh # On the cloud node
+bash runEdge.sh # On the edge node
+```
+
+These scripts internally execute a `docker compose` command like:
+
+```bash
+docker compose -f ../deployment.yaml up service1 service2 service3 ...
+```
+
+### ✏️ Customizing services
+
+If you want to deploy a different set of services:
+
+1. You can **edit the script** directly (`scripts/runCloud.sh` or `scripts/runEdge.sh`),  
+2. Or you can run the command manually from the project root with your desired services:
+
+```bash
+docker compose -f deployment.yaml up <your_services_here>
+```
+
+This approach provides flexibility to deploy only the components you need on each node.
+
+> Once the 5G core services are deployed in the cloud and the edge you will need to subscribe the UEs to the network using the WebUI service.
+
+
 
 ## Suscribe UE and check logs
 
----
+
 
 ## Two slices deployment
 
-Modificar AMF, SMFs, NSSF
-Config en el WebUI
-Deployar
+### Modificar AMF, SMFs, NSSF
+### Config en el WebUI
+### Deployar
 
---- 
+
 
 ## 💡 Notes
 
