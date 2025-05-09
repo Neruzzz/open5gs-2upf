@@ -308,7 +308,7 @@ edge
 
 ![Edge APN configuration](docs/img/APN2.png)
 
-> 🧠 For more details on configuring multiple slices, refer to the section: [Two Slices Deployment](#two-slices-deployment)
+> 🧠 For more details on configuring multiple slices, refer to the section: [Two Slices Deployment](#-two-slices-deployment)
 
 ### 7. Configure APN on the UE
 
