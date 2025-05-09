@@ -282,7 +282,7 @@ Fill in the following fields using the data from your SIM card provider:
 - **OPC (or OP)**
 
 You only need to fill those three fields.  
-This information can also be found in the `SIM/sim_cards.csv` file provided in this project.
+This information can also be found in the [`SIM/sim_cards.csv`](SIM/sim_cards.csv) file provided in this project.
 
 ![SIM card information](docs/img/siminfo.png "Enter SIM card details")
 
