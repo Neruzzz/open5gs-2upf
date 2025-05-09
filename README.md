@@ -317,7 +317,7 @@ To connect to the network, your device must have the same **APN name** configure
 > ⚠️ **Important:**  
 > - The **APN name must match exactly** what was set in the WebUI (e.g., `cloud`, `edge`)  
 > - The **APN type** must be set to: `default,internet` (no spaces)
-> Repeat these steps for each of the APNs configured in the WebUI.
+> - Repeat these steps for each of the APNs configured in the WebUI.
 
 Configuration steps may vary slightly depending on the phone model or Android/iOS version.
 
@@ -457,7 +457,7 @@ The first part of the configuration is the same as in the one slice deployment. 
 
 ![Slice 2 configuration](docs/img/slice2.png)
 
-> **Note:** The configuration in the UE is the same as for the one slice deployment unless you changed some APN name. Also the sim might need to be programed to support multislicing. You can refer to `SIM/NSSAIConfig` to know the commands to use onto the SIM.
+> **Note:** The configuration in the UE is the same as for the one slice deployment unless you changed some APN name. Also the sim might need to be programed to support multislicing. You can refer to [`SIM/NSSAIConfig`](SIM/NSSAIConfig) to know the commands to use onto the SIM.
 
 ### Deployment
 
