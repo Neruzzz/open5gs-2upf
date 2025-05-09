@@ -463,6 +463,74 @@ The first part of the configuration is the same as in the one slice deployment. 
 
 The setup is deployed as in the [previous example](#-deploying-the-docker-services). If you changed the files while the project was running you have to restart all the services. YAML files are uploaded to the container binaries at start so the changes wont take effect until open5gs services are restarted.
 
+## ⚖️ Check Traffic on Cloud and Edge UPFs
+
+To verify that traffic is flowing through the correct **UPF** (either cloud or edge), you can inspect the packets going through the `ogstun` interface inside the relevant Docker container.
+
+### 🚀 Steps
+
+1. **Access the container** running the UPF (cloud or edge):
+
+   ```bash
+   docker exec -it <container_name> bash
+   ```
+
+2. **Install tcpdump** (if not already installed):
+
+   ```bash
+   apt update && apt install tcpdump
+   ```
+
+3. **Run tcpdump** on the `ogstun` interface to observe traffic:
+
+   ```bash
+   tcpdump -i ogstun
+   ```
+
+4. (Optional) **Filter traffic by port** (e.g., to monitor HTTPS only):
+
+   ```bash
+   tcpdump -i ogstun port 443
+   ```
+
+
+### ☁️ Example Output (Cloud UPF)
+
+```bash
+root@eff3a793da5f:/open5gs# tcpdump -i ogstun
+listening on ogstun, link-type RAW (Raw IP), capture size 262144 bytes
+12:54:22.738102 IP 10.0.100.3.55100 > OpenWrt.lan.domain-s: Flags [S], seq 2279926248, win 65535, options [...], length 0
+12:54:22.778019 IP 10.0.100.3.13192 > OpenWrt.lan.domain: 42523+ A? www.google.com. (32)
+12:54:22.812521 IP 10.0.100.3.3308 > OpenWrt.lan.domain: 30978+ A? connectivitycheck.gstatic.com. (47)
+12:54:22.857317 IP OpenWrt.lan.domain > 10.0.100.3.16234: 1332 4/4/6 A 216.239.35.4, A 216.239.35.8, ...
+12:54:22.882965 IP 10.0.100.3.45174 > mad07s25-in-f3.1e100.net.http: Flags [.], ack 1, win 64, ...
+```
+
+* IP `10.0.100.3` is the UE address assigned by the **cloud** UPF.
+* This confirms that the **cloud UPF** is being used.
+
+
+### 🏠 Example Output (Edge UPF)
+
+```bash
+root@<edge_upf_container>:/open5gs# tcpdump -i ogstun
+listening on ogstun, link-type RAW (Raw IP), capture size 262144 bytes
+15:00:01.265450 IP mad41s13-in-f10.1e100.net.https > 10.0.100.4.53752: Flags [.], seq 68750:70098, ack 3486, win 1038, ...
+15:00:01.267316 IP mad41s13-in-f10.1e100.net.https > 10.0.100.4.53752: Flags [.], seq 71446:72794, ack 3486, win 1038, ...
+15:00:01.278573 IP mad41s13-in-f10.1e100.net.https > 10.0.100.4.53752: Flags [.], seq 82230:83578, ack 3486, win 1038, ...
+```
+
+* IP `10.0.100.4` is the UE address assigned by the **edge** UPF.
+* This confirms that the **edge UPF** is being used.
+
+
+### ℹ️ Important Notes
+
+* Depending on the **APN** set on the UE, traffic will be routed through either the **cloud** or **edge** UPF — not both.
+* You will only observe traffic in **one** of the UPFs at a time.
+* Use this method to confirm correct UPF selection and slicing behavior.
+* Filtering by port can help isolate traffic types (e.g., HTTP, HTTPS, DNS, MQTT) for analysis.
+
 
 ## 📜 License
 
