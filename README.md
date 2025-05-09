@@ -208,7 +208,7 @@ docker compose -f ../deployment.yaml up service1 service2 service3 ...
 
 If you want to deploy a different set of services:
 
-1. You can **edit the script** directly (`scripts/runCloud.sh` or `scripts/runEdge.sh`),  
+1. You can **edit the script** directly ([`scripts/runCloud.sh`](scripts/runCloud.sh) or [`scripts/runEdge.sh`](scripts/runEdge.sh)),  
 2. Or you can run the command manually from the project root with your desired services:
 
 ```bash
