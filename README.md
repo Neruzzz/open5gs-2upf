@@ -221,7 +221,7 @@ This approach provides flexibility to deploy only the components you need on eac
 
 
 
-## 📲 Subscribe UE and Check Logs
+## 📲 Subscribe UE
 
 Once the deployment is up, you need to **subscribe the UEs** to the network so they can register and access services.  
 This is done using the web application provided by the **WebUI** service.
@@ -294,11 +294,11 @@ By default, we use **one slice**. To configure it:
 
 - Scroll down and fill in the **Slice SST** and **SD** with the values used in your cloud SMF configuration.
 
-![Slice configuration section](docs/img/image.png)
+![Slice configuration section](docs/img/sliceconfig1.png)
 
 Then, add a second **APN** by clicking the second `+` icon from the left:
 
-![Add another APN](docs/img/image-1.png)
+![Add another APN](docs/img/APN1.png)
 
 Fill it just like the first one, but use the APN name configured for the **edge UPF**, typically something like:
 
@@ -306,20 +306,162 @@ Fill it just like the first one, but use the APN name configured for the **edge 
 edge
 ```
 
-![Edge APN configuration](docs/img/image-2.png)
+![Edge APN configuration](docs/img/APN2.png)
 
 > 🧠 For more details on configuring multiple slices, refer to the section: [Two Slices Deployment](#two-slices-deployment)
 
+### 7. Configure APN on the UE
 
-## Two slices deployment
+To connect to the network, your device must have the same **APN name** configured in the WebUI for the subscribed SIM.
 
-### Modificar AMF, SMFs, NSSF
-### Config en el WebUI
-### Deployar
+> ⚠️ **Important:**  
+> - The **APN name must match exactly** what was set in the WebUI (e.g., `cloud`, `edge`)  
+> - The **APN type** must be set to: `default,internet` (no spaces)
+> Repeat these steps for each of the APNs configured in the WebUI.
+
+Configuration steps may vary slightly depending on the phone model or Android/iOS version.
+
+#### 🤖 Android
+
+1. Go to **Settings** → **Network & Internet** → **Mobile Network**  
+2. Tap on **Access Point Names (APNs)**  
+3. Tap **+** or **Add new APN**
+4. Fill in the fields:
+   - **Name**: (any friendly name, e.g., `Cloud 5G`)
+   - **APN**: `cloud` or `edge` (depending on what you set in WebUI)
+   - **APN type**: `default,internet`
+5. Save the APN and select it as active
+
+#### 🍎 iOS
+
+1. Go to **Settings** → **Cellular**  
+2. If your device has multiple SIMs, select the active SIM (e.g., **Primary**, **Secondary**)  
+3. Tap **Cellular Data Network**
+4. Under **Cellular Data**, configure:
+   - **APN**: `cloud` or `edge` (must match exactly what was set in WebUI)
+   - **Username**: *(leave empty)*
+   - **Password**: *(leave empty)*
+5. Exit settings (you may need to restart the device)
+6. Make sure the configured SIM is selected as the default for mobile data:
+   - Go to **Settings** → **Cellular** → **Cellular Data** and select the correct SIM
+7. Wait a few seconds and verify the device connects to the network
+
+> ⚠️ The deployment has been tested with Android phones. **It could fail if you use iOS**.
 
 
+## 🍰 Two Slices Deployment
 
-## 💡 Notes
+This section explains how to configure and subscribe a UE to **two different network slices** with:
+
+- `SST: 1`, `SD: 000001` → for the **cloud slice** (APN: `cloud`)
+- `SST: 1`, `SD: 000002` → for the **edge slice** (APN: `edge`)
+
+---
+
+### 🛠️ Modify AMF, SMFs and NSSF YAML files
+
+In order to support multiple slices, you must modify configuration files for **AMF**, **NSSF**, and **both SMFs**.  
+> ⚠️ All of these changes apply only to the **cloud side** unless otherwise specified.
+
+---
+
+#### AMF (`amf.yaml`)
+
+The **AMF** handles UE registration, connection management, and initial slice selection. It must be configured to recognize the available slices. Uncomment the `s_nssai` section of the `plmn_support` block to include both `SD` values:
+
+```yaml
+plmn_support:
+  - plmn_id:
+      mcc: MCC
+      mnc: MNC
+    s_nssai:
+      - sst: 1
+        sd: 000001
+      #- sst: 1
+      #  sd: 000002
+```
+
+> ✅ This update is only needed in the **cloud-side AMF**.
+
+---
+
+#### NSSF (`nssf.yaml`)
+
+The **NSSF** (Network Slice Selection Function) manages slice discovery and selection logic.  
+You must **uncomment** the slice definition with `SD: 000002` in the `nsi` section:
+
+```yaml
+nsi:
+  - addr: NRF_IP
+    port: 7777
+    s_nssai:
+      sst: 1
+      sd: 000001
+  - addr: NRF_IP
+    port: 7777
+    s_nssai:
+      sst: 1
+      sd: 000002
+```
+
+> ✅ This file must also be updated **only in the cloud deployment**.
+
+---
+
+#### ☁️ SMF - Cloud Side (`smf.yaml`)
+
+In the cloud-side SMF (`smf.yaml`), define the following under the `info` section:
+
+```yaml
+info:
+  - s_nssai:
+      - sst: 1
+        sd: 000001
+        dnn:
+          - cloud
+```
+
+This tells the SMF to handle traffic for the **cloud slice** with APN `cloud`.
+
+
+#### 🖥️ SMF - Edge Side (`smf2.yaml`)
+
+In the edge-side SMF (`smf2.yaml`), define the edge slice in the `info` section:
+
+```yaml
+info:
+  - s_nssai:
+      - sst: 1
+        sd: 000002
+        dnn:
+          - edge
+```
+
+This connects the edge SMF to the **edge slice** with APN `edge`.
+
+
+### WebUI configuration
+
+The first part of the configuration is the same as in the one slice deployment. Put the SIM values onto the user information in the WebUI. Follow the steps until [Enter SIM card information](#5-enter-sim-card-information) the keep on going with the following:
+
+1. Add the information of the APN in the first slice:
+
+![Slice 1 configuration](docs/img/slice1.png)
+
+
+2. Then add a slice using the third `+` button from the left:
+
+![Add another slice](docs/img/APN1.png)
+
+3. Finally, add the second APN to the second slice changing the `SD` value to `000002`
+
+![Slice 2 configuration](docs/img/slice2.png)
+
+> **Note:** The configuration in the UE is the same as for the one slice deployment unless you changed some APN name. Also the sim might need to be programed to support multislicing. You can refer to `SIM/NSSAIConfig` to know the commands to use onto the SIM.
+
+### Deployment
+
+The setup is deployed as in the [previous example](#-deploying-the-docker-services). If you changed the files while the project was running you have to restart all the services. YAML files are uploaded to the container binaries at start so the changes wont take effect until open5gs services are restarted.
 
 
 ## 📜 License
