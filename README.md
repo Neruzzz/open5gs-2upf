@@ -510,7 +510,7 @@ listening on ogstun, link-type RAW (Raw IP), capture size 262144 bytes
 * This confirms that the **cloud UPF** is being used.
 
 
-### 🏠 Example Output (Edge UPF)
+### 🖥️ Example Output (Edge UPF)
 
 ```bash
 root@<edge_upf_container>:/open5gs# tcpdump -i ogstun
